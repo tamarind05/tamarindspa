@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tamarind Spa - 專業理療與舒壓天堂</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: #333; background-color: #f9f7f4; }
+        :root {
+            --primary-color: #8b7355;
+            --secondary-color: #d4a574;
+            --accent-color: #e8d4c4;
+            --dark-bg: #2c3e50;
+            --light-text: #f8f9fa;
+        }
+        header { background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%); color: var(--light-text); padding: 1rem 0; position: sticky; top: 0; z-index: 1000; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        nav { max-width: 1200px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; padding: 0 2rem; flex-wrap: wrap; }
+        .logo { font-size: 1.8rem; font-weight: bold; color: var(--secondary-color); letter-spacing: 2px; }
+        nav ul { list-style: none; display: flex; gap: 1.5rem; }
+        nav a { color: var(--light-text); text-decoration: none; cursor: pointer; transition: 0.3s; font-size: 0.9rem; }
+        nav a:hover { color: var(--secondary-color); }
+        .lang-switch { display: flex; gap: 8px; margin-left: 20px; }
+        .lang-btn { background: rgba(255,255,255,0.1); border: 1px solid var(--secondary-color); color: white; padding: 4px 12px; border-radius: 20px; cursor: pointer; font-size: 0.8rem; }
+        .lang-btn.active { background: var(--secondary-color); border-color: white; }
+        .hero { background: linear-gradient(rgba(44, 62, 80, 0.6), rgba(44, 62, 80, 0.6)), url('https://images.unsplash.com/photo-1544161515-4ab6ce6db874?auto=format&fit=crop&w=1200&q=80'); background-size: cover; background-position: center; color: var(--light-text); text-align: center; padding: 6rem 2rem; }
+        .hero h1 { font-size: 3rem; margin-bottom: 1rem; font-weight: 300; letter-spacing: 4px; }
+        .live-promo { background: #fff3e0; color: #e65100; padding: 10px; font-weight: bold; text-align: center; border-bottom: 2px solid #ffcc80; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 0 2rem; }
+        section { padding: 4rem 0; }
+        section h2 { text-align: center; font-size: 2.2rem; margin-bottom: 3rem; color: var(--primary-color); position: relative; padding-bottom: 1rem; }
+        section h2::after { content: ''; position: absolute; bottom: 0; left: 50%; transform: translateX(-50%); width: 60px; height: 3px; background: var(--secondary-color); }
+        .menu-tabs { display: flex; justify-content: center; gap: 1rem; margin-bottom: 2rem; flex-wrap: wrap; }
+        .menu-tab { padding: 0.7rem 1.5rem; background: white; border: 2px solid var(--secondary-color); border-radius: 25px; cursor: pointer; transition: 0.3s; color: var(--primary-color); font-weight: 600; }
+        .menu-tab.active { background: var(--secondary-color); color: white; }
+        .menu-content { display: none; animation: fadeIn 0.4s ease; }
+        .menu-content.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .menu-item { background: white; padding: 1.5rem; margin-bottom: 1rem; border-radius: 8px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 2px 8px rgba(0,0,0,0.1); border-left: 5px solid var(--secondary-color); }
+        .menu-item-info h4 { color: var(--primary-color); margin-bottom: 0.4rem; font-size: 1.2rem; }
+        .menu-item-info p { color: #666; font-size: 0.9rem; line-height: 1.5; max-width: 80%; }
+        .menu-item-price { background: var(--accent-color); color: var(--primary-color); padding: 0.6rem 1.2rem; border-radius: 5px; font-weight: bold; min-width: 170px; text-align: center; font-size: 1rem; }
+        .booking-form { max-width: 800px; margin: 0 auto; background: white; padding: 3rem; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
+        .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem; }
+        @media (max-width: 600px) { .form-row { grid-template-columns: 1fr; } .booking-form { padding: 1.5rem; } }
+        .form-group { margin-bottom: 1.2rem; }
+        label { display: block; margin-bottom: 0.5rem; color: var(--primary-color); font-weight: 600; }
+        input, select, textarea { width: 100%; padding: 0.9rem; border: 1px solid #ddd; border-radius: 8px; font-size: 1rem; outline: none; transition: 0.3s; }
+        .form-submit { background: var(--secondary-color); color: white; padding: 1.1rem; border: none; border-radius: 8px; font-size: 1.2rem; cursor: pointer; font-weight: 600; width: 100%; transition: 0.3s; margin-top: 1rem; }
+        .form-submit:disabled { background: #ccc; cursor: not-allowed; }
+        #group-notice { font-size: 0.85rem; color: #a0522d; margin-top: 0.5rem; display: none; background: #fff8f0; padding: 8px; border-radius: 5px; border-left: 3px solid var(--secondary-color); }
+        #bookingModal { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.8); z-index:2000; align-items:center; justify-content:center; padding: 20px; }
+        .receipt-card { background:white; width:100%; max-width:400px; padding:2rem; border-radius:15px; text-align:center; border-top: 10px solid var(--secondary-color); position: relative; }
+        .receipt-content { text-align:left; font-size:0.95rem; line-height:1.8; margin: 1.5rem 0; color: #444; border-top: 1px dashed #ccc; border-bottom: 1px dashed #ccc; padding: 15px 0; }
+        .receipt-footer { background:#fdfaf7; padding:10px; font-size:0.8rem; border-radius:8px; color:#8b7355; }
+        .contact-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 3rem; text-align: center; }
+        .social-links { display: flex; justify-content: center; gap: 1.5rem; margin-top: 2.5rem; padding-bottom: 1rem; }
+        .social-button { display: inline-flex; align-items: center; justify-content: center; width: 48px; height: 48px; border-radius: 50%; background: var(--secondary-color); color: white; text-decoration: none; font-size: 1rem; font-weight: bold; transition: 0.3s; cursor: pointer; }
+        footer { background: transparent; color: #999; text-align: center; padding: 1rem 0; font-size: 0.75rem; border-top: 1px solid #eee; max-width: 1000px; margin: 0 auto; }
+    </style>
+</head>
+<body>
+    <header>
+        <nav>
+            <div class="logo">🌿 TAMARIND SPA</div>
+            <ul>
+                <li><a onclick="scrollToSection('menu')">Menu</a></li>
+                <li><a onclick="scrollToSection('booking')">Booking</a></li>
+                <li><a onclick="scrollToSection('contact')">Contact</a></li>
+            </ul>
+            <div class="lang-switch">
+                <button class="lang-btn active" onclick="setLanguage('zh')">中文</button>
+                <button class="lang-btn" onclick="setLanguage('en')">EN</button>
+                <button class="lang-btn" onclick="setLanguage('vi')">VN</button>
+            </div>
+        </nav>
+    </header>
+    <div id="live-promo-bar" class="live-promo">
+        📢 <span id="promo-text-content">歡迎光臨 Tamarind Spa</span>
+    </div>
+    <section class="hero">
+        <h1 id="hero-h1">TAMARIND SPA</h1>
+        <p id="hero-p">尋找內心的寧靜 • 找到身體的平衡</p>
+    </section>
+    <section id="menu" class="container">
+        <h2 id="menu-title">服務菜單</h2>
+        <div class="menu-tabs">
+            <button class="menu-tab active" onclick="switchTab('combo', event)" id="tab-c">超值組合 (Combo)</button>
+            <button class="menu-tab" onclick="switchTab('massage', event)" id="tab-m">按摩系列</button>
+            <button class="menu-tab" onclick="switchTab('therapy', event)" id="tab-t">理療與美容</button>
+        </div>
+        <div id="combo" class="menu-content active">
+            <div class="menu-item"><div class="menu-item-info"><h4>Combo 1</h4><p class="lang" data-zh="腿部去角質 + 刮腳皮 + 腳底按摩" data-en="Exfoliation + Heel Scraping + Foot Massage" data-vi="Tẩy TB + Chà gót + Massage chân">腿部去角質 + 刮腳皮 + 腳底按摩</p></div><div class="menu-item-price">750,000 VND</div></div>
+            <div class="menu-item"><div class="menu-item-info"><h4>Combo 3</h4><p class="lang" data-zh="頭頸肩/後頸按摩 60' + 洗頭 60'" data-en="HNS & Nape Massage 60' + Hair Wash 60'" data-vi="Massage CVCG 60' + Gội đầu 60'">頭頸肩/後頸按摩 60' + 洗頭 60'</p></div><div class="menu-item-price">900,000 VND</div></div>
+            <div class="menu-item"><div class="menu-item-info"><h4>Special</h4><p class="lang" data-zh="掏耳 + 越式洗頭 (60')" data-en="Ear cleaning + Hair Wash (60')" data-vi="Lấy ráy tai + Gội đầu (60')">掏耳 + 越式洗頭 (60')</p></div><div class="menu-item-price">600,000 VND</div></div>
+        </div>
+        <div id="massage" class="menu-content">
+            <div class="menu-item"><div class="menu-item-info"><h4 class="lang" data-zh="頭頸肩頸按摩" data-en="Head, Neck & Shoulder" data-vi="Massage Đầu Cổ Vai">頭頸肩頸按摩</h4><p>60 min</p></div><div class="menu-item-price">550,000 VND</div></div>
+            <div class="menu-item"><div class="menu-item-info"><h4 class="lang" data-zh="全身油壓" data-en="Full Body Oil Massage" data-vi="Massage Body Tinh Dầu">全身油壓</h4><p>60': 500k / 90': 700k / 120': 800k</p></div><div class="menu-item-price">500k ~ 800k</div></div>
+            <div class="menu-item"><div class="menu-item-info"><h4 class="lang" data-zh="台式腳底按摩" data-en="Taiwanese Foot Massage" data-vi="Massage Chân Đài Loan">台式腳底按摩</h4><p>60 min</p></div><div class="menu-item-price">450,000 VND</div></div>
+        </div>
+        <div id="therapy" class="menu-content">
+            <div class="menu-item"><div class="menu-item-info"><h4 class="lang" data-zh="越式養生洗頭" data-en="Nourishing Hair Wash" data-vi="Gội Đầu Dưỡng Sinh">越式養生洗頭</h4><p>30': 250k / 60': 450k</p></div><div class="menu-item-price">250k / 450k</div></div>
+            <div class="menu-item"><div class="menu-item-info"><h4 class="lang" data-zh="刮腳皮 (Heel Care)" data-en="Heel Care" data-vi="Chà Gót Chân">刮腳皮 (Heel Care)</h4><p>30': 300k / 60': 500k</p></div><div class="menu-item-price">300k / 500k</div></div>
+            <div class="menu-item"><div class="menu-item-info"><h4 class="lang" data-zh="修手指甲 / 修腳指甲" data-en="Manicure / Pedicure" data-vi="Làm móng tay / móng chân">修手指甲 / 修腳指甲</h4><p>手 150k / 腳 180k</p></div><div class="menu-item-price">150k ~ 180k</div></div>
+        </div>
+    </section>
+    <section id="booking" class="container">
+        <h2 id="booking-h2">線上預約</h2>
+        <div class="booking-form">
+            <form id="spaForm">
+                <div class="form-row">
+                    <div class="form-group"><label id="lbl-name">預約姓名 *</label><input type="text" id="name" required placeholder="您的姓名 / Name"></div>
+                    <div class="form-group"><label id="lbl-phone">手機號碼 *</label><input type="tel" id="phone" required placeholder="電話號碼 / Phone Number"></div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label id="lbl-guests">預約人數 *</label>
+                        <select id="guests" onchange="checkGroupSize()" required>
+                            <option value="1">1 位</option><option value="2">2 位</option><option value="3">3 位</option><option value="4">4 位</option><option value="5">5 位以上</option>
+                        </select>
+                        <p id="group-notice">＊ 2 位以上同行，建議在備註欄註明需求。</p>
+                    </div>
+                    <div class="form-group"><label id="lbl-service">服務項目 *</label><select id="service" required></select></div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group"><label id="lbl-date">預約日期 *</label><input type="date" id="date" required></div>
+                    <div class="form-group"><label id="lbl-time">預約時間 *</label><input type="time" id="time" required></div>
+                </div>
+                <div class="form-group"><label id="lbl-note">備註 / 特殊需求</label><textarea id="note" rows="3" placeholder=""></textarea></div>
+                <button type="submit" class="form-submit" id="btn-submit">確認預約</button>
+            </form>
+        </div>
+    </section>
+    <div id="bookingModal">
+        <div class="receipt-card">
+            <div class="receipt-logo">🌿 TAMARIND SPA</div>
+            <h3 id="modal-title">預約憑證 / Receipt</h3>
+            <div id="receiptContent" class="receipt-content"></div>
+            <div class="receipt-footer" id="modal-footer">💡 請截圖此畫面，到店後向櫃檯展示。</div>
+            <button onclick="closeModal()" style="width:100%; margin-top:20px; padding:0.8rem; background:var(--dark-bg); color:white; border:none; border-radius:8px; cursor:pointer;">關閉 / Close</button>
+        </div>
+    </div>
+    <section id="contact" class="container">
+        <h2 id="contact-h2">聯絡我們</h2>
+        <div class="contact-grid">
+            <div class="contact-item"><h4 id="c-addr">📍 店面地址</h4><p>No. 2, Nguyen Thai Binh Street, Phu Quoc</p></div>
+            <div class="contact-item"><h4 id="c-tel">📞 聯絡電話</h4><p>+84 0336 807 948</p></div>
+            <div class="contact-item"><h4 id="c-time">⏰ 營業時間</h4><p>08:00 - 23:00</p></div>
+        </div>
+        <div class="social-links">
+            <a href="https://www.facebook.com/share/16ya8BJyzh/?mibextid=wwXIfr" class="social-button">FB</a>
+            <a href="https://www.instagram.com/tuy.en1981?igsh=eWhpMm9ydmozYTh4&utm_source=qr" class="social-button">IG</a>
+            <a href="https://line.me/ti/p/7CxWV_7Ath#~" class="social-button">L</a>
+            <a onclick="copyWeChat('ab0336807948')" class="social-button">微信</a>
+        </div>
+    </section>
+    <footer><p>&copy; 2026 Tamarind Spa. All Rights Reserved.</p></footer>
+
+    <script>
+        const SB_URL = 'https://djjlxhavjhjoewaueyrz.supabase.co'.trim();
+        const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRqamx4aGF2amhqb2V3YXVleXJ6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjkzMTAzODUsImV4cCI6MjA4NDg4NjM4NX0.pcOaG1ablIIhKSpFYn70CJOtlhk5f_dYope48naUcLA'.trim();
+        const _supabase = supabase.createClient(SB_URL, SB_KEY);
+
+        window.onload = () => { 
+            setLanguage('zh'); 
+            initPromo(); 
+            trackPageView();
+            document.getElementById('spaForm').addEventListener('submit', handleBooking);
+        };
+
+        async function initPromo() {
+            try {
+                // 抓取一次現有的公告
+                const { data } = await _supabase.from('site_content').select('content').eq('key', 'promo_text').single();
+                if (data && data.content.trim() !== "") {
+                    document.getElementById('promo-text-content').innerText = data.content;
+                }
+                // 訂閱即時更新，讓您後台改完立刻生效
+                _supabase.channel('site_content').on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'site_content' }, payload => {
+                    if (payload.new && payload.new.key === 'promo_text') {
+                        document.getElementById('promo-text-content').innerText = payload.new.content;
+                    }
+                }).subscribe();
+            } catch (e) { console.log("Realtime promo error: ", e); }
+        }
+
+        const translations = {
+            zh: { h1: "TAMARIND SPA", p: "尋找內心的寧靜 • 找到身體的平衡", mTitle: "服務菜單", tabC: "超值組合", tabM: "按摩系列", tabT: "理療與美容", bH2: "線上預約", btn: "確認預約", cH2: "聯絡我們", cA: "📍 店面地址", cT: "📞 聯絡電話", cTm: "⏰ 營業時間", notice: "＊ 2 位以上同行，建議在備註欄註明需求。", mR: "預約憑證 / Receipt", mF: "💡 請截圖此畫面，到店後向櫃檯展示。", lN: "預約姓名 *", lPh: "手機號碼 *", lG: "預約人數 *", lS: "服務項目 *", lD: "預約日期 *", lTm: "預約時間 *", lNt: "備註 / 特殊需求", sDefault: "-- 請選擇服務項目 --" },
+            en: { h1: "TAMARIND SPA", p: "Inner Peace • Body Balance", mTitle: "Menu", tabC: "Combos", tabM: "Massage", tabT: "Therapy", bH2: "Online Booking", btn: "Confirm Booking", cH2: "Contact", cA: "📍 Address", cT: "📞 Phone", cTm: "⏰ Hours", notice: "* For 2+ guests, please specify requests in notes.", mR: "Booking Receipt", mF: "💡 Please take a screenshot for check-in.", lN: "Name *", lPh: "Phone *", lG: "Guests *", lS: "Service *", lD: "Date *", lTm: "Time *", lNt: "Note", sDefault: "-- Select Service --" },
+            vi: { h1: "TAMARIND SPA", p: "Thư giãn & Cân bằng", mTitle: "Danh Mục", tabC: "Gói Combo", tabM: "Massage", tabT: "Trị liệu", bH2: "Đặt Lịch", btn: "Xác nhận ngay", cH2: "Liên Hệ", cA: "📍 Địa chỉ", cT: "📞 Điện thoại", cTm: "⏰ Giờ mở cửa", notice: "* Từ 2 khách trở lên, vui lòng ghi chú yêu cầu.", mR: "Biên nhận đặt lịch", mF: "💡 Vui lòng chụp màn hình để đối chiếu khi đến tiệm.", lN: "Họ Tên *", lPh: "Số điện thoại *", lG: "Số người *", lS: "Dịch vụ *", lD: "Ngày *", lTm: "Giờ *", lNt: "Ghi chú", sDefault: "-- Chọn dịch vụ --" }
+        };
+
+        const serviceData = {
+            zh: ["Combo 1: 腿部去角質+刮腳皮+足部按摩 (750k)", "Combo 2: 熱石足部60'+洗頭30' (750k)", "Combo 3: 頭頸肩60'+洗頭60' (900k)", "Combo 4: 頭肩頸背60'+足部60' (900k)", "Combo 5: 修甲+去角質+磨腳+足部按摩 (950k)", "Combo 6: 熱石足部60'+熱石全身90' (1,090k)", "Combo 7: 掏耳+洗頭60'+耳燭 (700k)", "Combo 8: 足部按摩60'+洗頭60' (850k)", "Combo 9: 全身按摩90'+洗頭30' (900k)", "Combo 10: 身體按摩90'+洗頭30'+耳燭 (990k)", "Combo 11: 熱石全身90'+洗頭30' (990k)", "Combo 12: 全身按摩90'+足部按摩60' (1,100k)", "掏耳 + 越式洗頭 60' (600k)", "掏耳 + 腳底按摩 60' (600k)", "頭頸肩頸按摩 60' (550k)", "全身油壓 (500k~800k)", "台式腳底按摩 60' (450k)", "越式養生洗頭 (250k~450k)", "刮腳皮 Heel Care (300k~500k)", "掏耳 Ear Cleaning (250k)", "修指甲 Manicure/Pedicure (150k/180k)", "刮痧 Gua Sha (150k)"],
+            en: ["Combo 1: Exfoliation+Heel+Foot (750k)", "Combo 2: Hot Stone Foot+Wash 30' (750k)", "Combo 3: HNS Massage+Wash 60' (900k)", "Combo 4: HNSB Massage+Foot 60' (900k)", "Combo 5: Mani+Pedi+Foot (950k)", "Combo 6: Hot Stone Foot+Body 90' (1,090k)", "Combo 7: Ear Clean+Wash 60'+Steam (700k)", "Combo 8: Foot Massage+Wash 60' (850k)", "Combo 9: Body Massage 90'+Wash 30' (900k)", "Combo 10: Body 90'+Wash 30'+Steam (990k)", "Combo 11: Hot Stone Body+Wash 30' (990k)", "Combo 12: Body 90'+Foot 60' (1,100k)", "Ear Clean + Hair Wash (600k)", "Ear Clean + Foot Massage (600k)", "HNS Massage 60' (550k)", "Body Oil Massage (500k~800k)", "Taiwanese Foot Massage (450k)", "Nourishing Hair Wash (250k~450k)", "Heel Care (300k~500k)", "Ear Cleaning (250k)", "Mani/Pedi (150k~180k)", "Gua Sha (150k)"],
+            vi: ["Combo 1: Tẩy TB+Chà gót+Massage chân (750k)", "Combo 2: Đá nóng chân+Gội đầu 30' (750k)", "Combo 3: Massage CVCG+Gội đầu 60' (900k)", "Combo 4: CVCG+Massage chân 60' (900k)", "Combo 5: Làm móng+Chà gót+Massage (950k)", "Combo 6: Đá nóng chân+Body 90' (1,090k)", "Combo 7: Lấy ráy tai+Gội đầu 60'+Xông (700k)", "Combo 8: Massage chân+Gội đầu 60' (850k)", "Combo 9: Massage body 90'+Gội đầu 30' (900k)", "Combo 10: Body 90'+Gội đầu 30'+Xông (990k)", "Combo 11: Đá nóng body+Gội đầu 30' (990k)", "Combo 12: Massage body 90'+Chân 60' (1,100k)", "Lấy ráy tai + Gội đầu (600k)", "Lấy ráy tai + Massage chân (600k)", "Massage CVCG 60' (550k)", "Massage Body Tinh Dầu (500k~800k)", "Massage Chân Đài Loan (450k)", "Gội Đầu Dưỡng Sinh (250k~450k)", "Chà gót chân (300k~500k)", "Lấy Ráy Tai (250k)", "Làm móng tay/chân (150k/180k)", "Cạo Gió (150k)"]
+        };
+
+        function setLanguage(lang) {
+            const t = translations[lang];
+            document.getElementById('hero-h1').innerText = t.h1;
+            document.getElementById('hero-p').innerText = t.p;
+            document.getElementById('menu-title').innerText = t.mTitle;
+            document.getElementById('tab-c').innerText = t.tabC;
+            document.getElementById('tab-m').innerText = t.tabM;
+            document.getElementById('tab-t').innerText = t.tabT;
+            document.getElementById('booking-h2').innerText = t.bH2;
+            document.getElementById('btn-submit').innerText = t.btn;
+            document.getElementById('contact-h2').innerText = t.cH2;
+            document.getElementById('c-addr').innerText = t.cA;
+            document.getElementById('c-tel').innerText = t.cT;
+            document.getElementById('c-time').innerText = t.cTm;
+            document.getElementById('group-notice').innerText = t.notice;
+            document.getElementById('modal-title').innerText = t.mR;
+            document.getElementById('modal-footer').innerText = t.mF;
+            document.getElementById('lbl-name').innerText = t.lN;
+            document.getElementById('lbl-phone').innerText = t.lPh;
+            document.getElementById('lbl-guests').innerText = t.lG;
+            document.getElementById('lbl-service').innerText = t.lS;
+            document.getElementById('lbl-date').innerText = t.lD;
+            document.getElementById('lbl-time').innerText = t.lTm;
+            document.getElementById('lbl-note').innerText = t.lNt;
+            const s = document.getElementById('service');
+            s.innerHTML = `<option value="">${t.sDefault}</option>`;
+            serviceData[lang].forEach(i => { let o = document.createElement('option'); o.value = i; o.innerText = i; s.appendChild(o); });
+            document.querySelectorAll('.lang').forEach(el => el.innerText = el.getAttribute(`data-${lang}`));
+            document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
+            const btns = document.querySelectorAll('.lang-btn');
+            if(lang === 'zh') btns[0].classList.add('active');
+            if(lang === 'en') btns[1].classList.add('active');
+            if(lang === 'vi') btns[2].classList.add('active');
+        }
+
+        async function trackPageView() {
+            try {
+                const { data } = await _supabase.from('page_views').select('count').eq('id', 1).single();
+                if (data) await _supabase.from('page_views').update({ count: data.count + 1 }).eq('id', 1);
+            } catch(e) {}
+        }
+
+        function scrollToSection(id) { document.getElementById(id).scrollIntoView({ behavior: 'smooth' }); }
+
+        function switchTab(id, event) {
+            document.querySelectorAll('.menu-content').forEach(c => c.classList.remove('active'));
+            document.querySelectorAll('.menu-tab').forEach(t => t.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            event.target.classList.add('active');
+        }
+
+        function checkGroupSize() { document.getElementById('group-notice').style.display = (document.getElementById('guests').value >= 2) ? 'block' : 'none'; }
+
+        async function handleBooking(event) {
+            event.preventDefault();
+            const btn = document.getElementById('btn-submit');
+            btn.disabled = true;
+            btn.innerText = "Processing...";
+
+            const name = document.getElementById('name').value;
+            const phone = document.getElementById('phone').value;
+            const guests = document.getElementById('guests').value;
+            const service = document.getElementById('service').value;
+            const date = document.getElementById('date').value;
+            const time = document.getElementById('time').value;
+            const note = document.getElementById('note').value || "無 / None";
+
+            try {
+                const { error } = await _supabase.from('bookings').insert([{ 
+                    name, phone, service, booking_date: `${date} ${time}`, remark: `人數: ${guests}, 備註: ${note}`, status: '待確認' 
+                }]);
+                if (error) throw error;
+                document.getElementById('receiptContent').innerHTML = `<p><strong>Name / 姓名:</strong> ${name}</p><p><strong>Phone / 電話:</strong> ${phone}</p><p><strong>Guests / 人數:</strong> ${guests}</p><p><strong>Service / 服務:</strong><br>${service}</p><p><strong>Date / 日期:</strong> ${date}</p><p><strong>Time / 時間:</strong> ${time}</p><p><strong>Note / 備註:</strong> ${note}</p>`;
+                document.getElementById('bookingModal').style.display = 'flex';
+                document.getElementById('spaForm').reset();
+            } catch (err) {
+                alert('System busy. Please contact us via social media.');
+            } finally {
+                btn.disabled = false;
+                const activeBtn = document.querySelector('.lang-btn.active');
+                const lang = activeBtn.innerText === '中文' ? 'zh' : (activeBtn.innerText === 'EN' ? 'en' : 'vi');
+                btn.innerText = translations[lang].btn;
+            }
+        }
+
+        function closeModal() { document.getElementById('bookingModal').style.display = 'none'; }
+        function copyWeChat(id) { navigator.clipboard.writeText(id).then(() => alert('WeChat ID 已複製: ' + id)); }
+    </script>
+</body>
+</html>
