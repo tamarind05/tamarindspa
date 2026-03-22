@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tamarind Spa - 專業理療與舒壓天堂</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <!-- 引入 EmailJS SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: #333; background-color: #f9f7f4; }
@@ -176,16 +178,21 @@
     <footer><p>&copy; 2026 Tamarind Spa. All Rights Reserved.</p></footer>
 
     <script>
+        // 初始化 ID
         const SB_URL = 'https://djjlxhavjhjoewaueyrz.supabase.co'.trim();
         const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRqamx4aGF2amhqb2V3YXVleXJ6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjkzMTAzODUsImV4cCI6MjA4NDg4NjM4NX0.pcOaG1ablIIhKSpFYn70CJOtlhk5f_dYope48naUcLA'.trim();
         const _supabase = supabase.createClient(SB_URL, SB_KEY);
+
+        // 初始化 EmailJS
+        (function() {
+            emailjs.init("d_b14MTbPDH6grh9j");
+        })();
 
         window.onload = () => { 
             setLanguage('zh'); 
             initPromo(); 
             trackPageView();
             
-            // 限制日期：禁止選擇過去日期
             const today = new Date().toISOString().split('T')[0];
             document.getElementById('date').setAttribute('min', today);
             
@@ -257,8 +264,15 @@
         async function handleBooking(event) {
             event.preventDefault();
             const btn = document.getElementById('btn-submit');
+            const name = document.getElementById('name').value;
+            const phone = document.getElementById('phone').value;
             const email = document.getElementById('email').value;
-            
+            const guests = document.getElementById('guests').value;
+            const service = document.getElementById('service').value;
+            const date = document.getElementById('date').value;
+            const time = document.getElementById('time').value;
+            const note = document.getElementById('note').value || "無 / None";
+
             if(!email.includes('@')) {
                 alert('Invalid Email Format');
                 return;
@@ -267,15 +281,8 @@
             btn.disabled = true;
             btn.innerText = "Processing...";
 
-            const name = document.getElementById('name').value;
-            const phone = document.getElementById('phone').value;
-            const guests = document.getElementById('guests').value;
-            const service = document.getElementById('service').value;
-            const date = document.getElementById('date').value;
-            const time = document.getElementById('time').value;
-            const note = document.getElementById('note').value || "無 / None";
-
             try {
+                // 1. 存入 Supabase
                 const { error } = await _supabase.from('bookings').insert([{ 
                     name, 
                     phone, 
@@ -287,6 +294,22 @@
                 
                 if (error) throw error;
 
+                // 2. 發送 EmailJS 通知 (正確嵌入點)
+                const templateParams = {
+                    to_email: email,      // 客人的信箱
+                    user_name: name,
+                    user_phone: phone,
+                    user_service: service,
+                    user_date: date,
+                    user_time: time,
+                    user_guests: guests,
+                    user_note: note
+                };
+
+                await emailjs.send('service_ufwvzgq', 'template_o5nx8uj', templateParams);
+                console.log('Email sent successfully!');
+
+                // 3. 顯示成功彈窗
                 document.getElementById('receiptContent').innerHTML = `
                     <p><strong>Name / 姓名:</strong> ${name}</p>
                     <p><strong>Phone / 電話:</strong> ${phone}</p>
@@ -300,6 +323,7 @@
                 document.getElementById('bookingModal').style.display = 'flex';
                 document.getElementById('spaForm').reset();
             } catch (err) {
+                console.error(err);
                 alert('System busy. Please contact us via social media.');
             } finally {
                 btn.disabled = false;
