@@ -43,7 +43,8 @@
         .menu-item-price { background: var(--accent-color); color: var(--primary-color); padding: 0.6rem 1.2rem; border-radius: 5px; font-weight: bold; min-width: 170px; text-align: center; font-size: 1rem; }
         .booking-form { max-width: 800px; margin: 0 auto; background: white; padding: 3rem; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
         .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; margin-bottom: 1.5rem; }
-        @media (max-width: 600px) { .form-row { grid-template-columns: 1fr; } .booking-form { padding: 1.5rem; } }
+        .form-full { grid-column: span 2; }
+        @media (max-width: 600px) { .form-row { grid-template-columns: 1fr; } .booking-form { padding: 1.5rem; } .form-full { grid-column: span 1; } }
         .form-group { margin-bottom: 1.2rem; }
         label { display: block; margin-bottom: 0.5rem; color: var(--primary-color); font-weight: 600; }
         input, select, textarea { width: 100%; padding: 0.9rem; border: 1px solid #ddd; border-radius: 8px; font-size: 1rem; outline: none; transition: 0.3s; }
@@ -83,6 +84,7 @@
         <h1 id="hero-h1">TAMARIND SPA</h1>
         <p id="hero-p">尋找內心的寧靜 • 找到身體的平衡</p>
     </section>
+
     <section id="menu" class="container">
         <h2 id="menu-title">服務菜單</h2>
         <div class="menu-tabs">
@@ -121,8 +123,11 @@
         <div class="booking-form">
             <form id="spaForm">
                 <div class="form-row">
-                    <div class="form-group"><label id="lbl-name">預約姓名 *</label><input type="text" id="name" required placeholder="您的姓名 / Name"></div>
-                    <div class="form-group"><label id="lbl-tel">聯絡信箱 *</label><input type="tel" id="mail" required placeholder="聯絡信箱 / mail"></div>
+                    <div class="form-group"><label id="lbl-name">預約姓名 *</label><input type="text" id="name" required placeholder="Name"></div>
+                    <div class="form-group"><label id="lbl-phone">手機號碼 *</label><input type="tel" id="phone" required placeholder="Phone" pattern="[0-9\+\-\s]+"></div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group form-full"><label id="lbl-email">電子信箱 *</label><input type="email" id="email" required placeholder="email@example.com"></div>
                 </div>
                 <div class="form-row">
                     <div class="form-group">
@@ -164,8 +169,8 @@
         <div class="social-links">
             <a href="https://www.facebook.com/share/16ya8BJyzh/?mibextid=wwXIfr" class="social-button">FB</a>
             <a href="https://www.instagram.com/tuy.en1981?igsh=eWhpMm9ydmozYTh4&utm_source=qr" class="social-button">IG</a>
-            <a href="https://line.me/ti/p/k2mbDjPZUw" class="social-button">L</a>
-            <a onclick="copyWeChat('soyuuuuu')" class="social-button">微信</a>
+            <a href="https://line.me/ti/p/7CxWV_7Ath#~" class="social-button">L</a>
+            <a onclick="copyWeChat('ab0336807948')" class="social-button">微信</a>
         </div>
     </section>
     <footer><p>&copy; 2026 Tamarind Spa. All Rights Reserved.</p></footer>
@@ -179,6 +184,11 @@
             setLanguage('zh'); 
             initPromo(); 
             trackPageView();
+            
+            // 限制日期：禁止選擇過去日期
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('date').setAttribute('min', today);
+            
             document.getElementById('spaForm').addEventListener('submit', handleBooking);
         };
 
@@ -197,9 +207,9 @@
         }
 
         const translations = {
-            zh: { h1: "TAMARIND SPA", p: "尋找內心的寧靜 • 找到身體的平衡", mTitle: "服務菜單", tabC: "超值組合", tabM: "按摩系列", tabT: "理療與美容", bH2: "線上預約", btn: "確認預約", cH2: "聯絡我們", cA: "📍 店面地址", cT: "📞 聯絡電話", cTm: "⏰ 營業時間", notice: "＊ 2 位以上同行，建議在備註欄註明需求。", mR: "預約憑證 / Receipt", mF: "💡 請截圖此畫面，到店後向櫃檯展示。", lN: "預約姓名 *", lPh: "手機號碼 *", lG: "預約人數 *", lS: "服務項目 *", lD: "預約日期 *", lTm: "預約時間 *", lNt: "備註 / 特殊需求", sDefault: "-- 請選擇服務項目 --" },
-            en: { h1: "TAMARIND SPA", p: "Inner Peace • Body Balance", mTitle: "Menu", tabC: "Combos", tabM: "Massage", tabT: "Therapy", bH2: "Online Booking", btn: "Confirm Booking", cH2: "Contact", cA: "📍 Address", cT: "📞 Phone", cTm: "⏰ Hours", notice: "* For 2+ guests, please specify requests in notes.", mR: "Booking Receipt", mF: "💡 Please take a screenshot for check-in.", lN: "Name *", lPh: "Phone *", lG: "Guests *", lS: "Service *", lD: "Date *", lTm: "Time *", lNt: "Note", sDefault: "-- Select Service --" },
-            vi: { h1: "TAMARIND SPA", p: "Thư giãn & Cân bằng", mTitle: "Danh Mục", tabC: "Gói Combo", tabM: "Massage", tabT: "Trị liệu", bH2: "Đặt Lịch", btn: "Xác nhận ngay", cH2: "Liên Hệ", cA: "📍 Địa chỉ", cT: "📞 Điện thoại", cTm: "⏰ Giờ mở cửa", notice: "* Từ 2 khách trở lên, vui lòng ghi chú yêu cầu.", mR: "Biên nhận đặt lịch", mF: "💡 Vui lòng chụp màn hình để đối chiếu khi đến tiệm.", lN: "Họ Tên *", lPh: "Số điện thoại *", lG: "Số người *", lS: "Dịch vụ *", lD: "Ngày *", lTm: "Giờ *", lNt: "Ghi chú", sDefault: "-- Chọn dịch vụ --" }
+            zh: { h1: "TAMARIND SPA", p: "尋找內心的寧靜 • 找到身體的平衡", mTitle: "服務菜單", tabC: "超值組合", tabM: "按摩系列", tabT: "理療與美容", bH2: "線上預約", btn: "確認預約", cH2: "聯絡我們", cA: "📍 店面地址", cT: "📞 聯絡電話", cTm: "⏰ 營業時間", notice: "＊ 2 位以上同行，建議在備註欄註明需求。", mR: "預約憑證 / Receipt", mF: "💡 請截圖此畫面，到店後向櫃檯展示。", lN: "預約姓名 *", lPh: "手機號碼 *", lE: "電子信箱 *", lG: "預約人數 *", lS: "服務項目 *", lD: "預約日期 *", lTm: "預約時間 *", lNt: "備註 / 特殊需求", sDefault: "-- 請選擇服務項目 --" },
+            en: { h1: "TAMARIND SPA", p: "Inner Peace • Body Balance", mTitle: "Menu", tabC: "Combos", tabM: "Massage", tabT: "Therapy", bH2: "Online Booking", btn: "Confirm Booking", cH2: "Contact", cA: "📍 Address", cT: "📞 Phone", cTm: "⏰ Hours", notice: "* For 2+ guests, please specify requests in notes.", mR: "Booking Receipt", mF: "💡 Please take a screenshot for check-in.", lN: "Name *", lPh: "Phone *", lE: "Email *", lG: "Guests *", lS: "Service *", lD: "Date *", lTm: "Time *", lNt: "Note", sDefault: "-- Select Service --" },
+            vi: { h1: "TAMARIND SPA", p: "Thư giãn & Cân bằng", mTitle: "Danh Mục", tabC: "Gói Combo", tabM: "Massage", tabT: "Trị liệu", bH2: "Đặt Lịch", btn: "Xác nhận ngay", cH2: "Liên Hệ", cA: "📍 Địa chỉ", cT: "📞 Điện thoại", cTm: "⏰ Giờ mở cửa", notice: "* Từ 2 khách trở lên, vui lòng ghi chú yêu cầu.", mR: "Biên nhận đặt lịch", mF: "💡 Vui lòng chụp màn hình để đối chiếu khi đến tiệm.", lN: "Họ Tên *", lPh: "Số điện thoại *", lE: "Email *", lG: "Số người *", lS: "Dịch vụ *", lD: "Ngày *", lTm: "Giờ *", lNt: "Ghi chú", sDefault: "-- Chọn dịch vụ --" }
         };
 
         const serviceData = {
@@ -227,6 +237,7 @@
             document.getElementById('modal-footer').innerText = t.mF;
             document.getElementById('lbl-name').innerText = t.lN;
             document.getElementById('lbl-phone').innerText = t.lPh;
+            document.getElementById('lbl-email').innerText = t.lE;
             document.getElementById('lbl-guests').innerText = t.lG;
             document.getElementById('lbl-service').innerText = t.lS;
             document.getElementById('lbl-date').innerText = t.lD;
@@ -243,27 +254,16 @@
             if(lang === 'vi') btns[2].classList.add('active');
         }
 
-        async function trackPageView() {
-            try {
-                const { data } = await _supabase.from('page_views').select('count').eq('id', 1).single();
-                if (data) await _supabase.from('page_views').update({ count: data.count + 1 }).eq('id', 1);
-            } catch(e) {}
-        }
-
-        function scrollToSection(id) { document.getElementById(id).scrollIntoView({ behavior: 'smooth' }); }
-
-        function switchTab(id, event) {
-            document.querySelectorAll('.menu-content').forEach(c => c.classList.remove('active'));
-            document.querySelectorAll('.menu-tab').forEach(t => t.classList.remove('active'));
-            document.getElementById(id).classList.add('active');
-            event.target.classList.add('active');
-        }
-
-        function checkGroupSize() { document.getElementById('group-notice').style.display = (document.getElementById('guests').value >= 2) ? 'block' : 'none'; }
-
         async function handleBooking(event) {
             event.preventDefault();
             const btn = document.getElementById('btn-submit');
+            const email = document.getElementById('email').value;
+            
+            if(!email.includes('@')) {
+                alert('Invalid Email Format');
+                return;
+            }
+
             btn.disabled = true;
             btn.innerText = "Processing...";
 
@@ -277,10 +277,26 @@
 
             try {
                 const { error } = await _supabase.from('bookings').insert([{ 
-                    name, phone, service, booking_date: `${date} ${time}`, remark: `人數: ${guests}, 備註: ${note}`, status: '待確認' 
+                    name, 
+                    phone, 
+                    service, 
+                    booking_date: `${date} ${time}`, 
+                    remark: `Email: ${email}, 人數: ${guests}, 備註: ${note}`, 
+                    status: '待確認' 
                 }]);
+                
                 if (error) throw error;
-                document.getElementById('receiptContent').innerHTML = `<p><strong>Name / 姓名:</strong> ${name}</p><p><strong>Phone / 電話:</strong> ${phone}</p><p><strong>Guests / 人數:</strong> ${guests}</p><p><strong>Service / 服務:</strong><br>${service}</p><p><strong>Date / 日期:</strong> ${date}</p><p><strong>Time / 時間:</strong> ${time}</p><p><strong>Note / 備註:</strong> ${note}</p>`;
+
+                document.getElementById('receiptContent').innerHTML = `
+                    <p><strong>Name / 姓名:</strong> ${name}</p>
+                    <p><strong>Phone / 電話:</strong> ${phone}</p>
+                    <p><strong>Email:</strong> ${email}</p>
+                    <p><strong>Guests / 人數:</strong> ${guests}</p>
+                    <p><strong>Service / 服務:</strong><br>${service}</p>
+                    <p><strong>Date / 日期:</strong> ${date}</p>
+                    <p><strong>Time / 時間:</strong> ${time}</p>
+                    <p><strong>Note / 備註:</strong> ${note}</p>
+                `;
                 document.getElementById('bookingModal').style.display = 'flex';
                 document.getElementById('spaForm').reset();
             } catch (err) {
@@ -293,6 +309,20 @@
             }
         }
 
+        async function trackPageView() {
+            try {
+                const { data } = await _supabase.from('page_views').select('count').eq('id', 1).single();
+                if (data) await _supabase.from('page_views').update({ count: data.count + 1 }).eq('id', 1);
+            } catch(e) {}
+        }
+        function scrollToSection(id) { document.getElementById(id).scrollIntoView({ behavior: 'smooth' }); }
+        function switchTab(id, event) {
+            document.querySelectorAll('.menu-content').forEach(c => c.classList.remove('active'));
+            document.querySelectorAll('.menu-tab').forEach(t => t.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            event.target.classList.add('active');
+        }
+        function checkGroupSize() { document.getElementById('group-notice').style.display = (document.getElementById('guests').value >= 2) ? 'block' : 'none'; }
         function closeModal() { document.getElementById('bookingModal').style.display = 'none'; }
         function copyWeChat(id) { navigator.clipboard.writeText(id).then(() => alert('WeChat ID 已複製: ' + id)); }
     </script>
