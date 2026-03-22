@@ -16,6 +16,7 @@
             --accent-color: #e8d4c4;
             --dark-bg: #2c3e50;
             --light-text: #f8f9fa;
+            --error-color: #e74c3c;
         }
         header { background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%); color: var(--light-text); padding: 1rem 0; position: sticky; top: 0; z-index: 1000; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
         nav { max-width: 1200px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; padding: 0 2rem; flex-wrap: wrap; }
@@ -50,6 +51,9 @@
         .form-group { margin-bottom: 1.2rem; }
         label { display: block; margin-bottom: 0.5rem; color: var(--primary-color); font-weight: 600; }
         input, select, textarea { width: 100%; padding: 0.9rem; border: 1px solid #ddd; border-radius: 8px; font-size: 1rem; outline: none; transition: 0.3s; }
+        input:focus { border-color: var(--secondary-color); }
+        input.invalid { border-color: var(--error-color); background-color: #fff6f6; }
+        .error-msg { color: var(--error-color); font-size: 0.8rem; margin-top: 4px; display: none; }
         .form-submit { background: var(--secondary-color); color: white; padding: 1.1rem; border: none; border-radius: 8px; font-size: 1.2rem; cursor: pointer; font-weight: 600; width: 100%; transition: 0.3s; margin-top: 1rem; }
         .form-submit:disabled { background: #ccc; cursor: not-allowed; }
         #group-notice { font-size: 0.85rem; color: #a0522d; margin-top: 0.5rem; display: none; background: #fff8f0; padding: 8px; border-radius: 5px; border-left: 3px solid var(--secondary-color); }
@@ -129,7 +133,11 @@
                     <div class="form-group"><label id="lbl-phone">手機號碼 *</label><input type="tel" id="phone" required placeholder="Phone" pattern="[0-9\+\-\s]+"></div>
                 </div>
                 <div class="form-row">
-                    <div class="form-group form-full"><label id="lbl-email">電子信箱 *</label><input type="email" id="email" required placeholder="email@example.com"></div>
+                    <div class="form-group form-full">
+                        <label id="lbl-email">電子信箱 *</label>
+                        <input type="email" id="email" required placeholder="email@example.com">
+                        <p id="email-error" class="error-msg">請輸入正確的信箱格式 / Please enter a valid email.</p>
+                    </div>
                 </div>
                 <div class="form-row">
                     <div class="form-group">
@@ -196,8 +204,31 @@
             const today = new Date().toISOString().split('T')[0];
             document.getElementById('date').setAttribute('min', today);
             
+            // 加入信箱即時驗證監聽
+            const emailInput = document.getElementById('email');
+            emailInput.addEventListener('input', function() {
+                validateEmail(this.value);
+            });
+
             document.getElementById('spaForm').addEventListener('submit', handleBooking);
         };
+
+        // 信箱格式強化驗證函數
+        function validateEmail(email) {
+            const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            const isValid = re.test(email);
+            const emailInput = document.getElementById('email');
+            const errorMsg = document.getElementById('email-error');
+            
+            if (email.length > 0 && !isValid) {
+                emailInput.classList.add('invalid');
+                errorMsg.style.display = 'block';
+            } else {
+                emailInput.classList.remove('invalid');
+                errorMsg.style.display = 'none';
+            }
+            return isValid;
+        }
 
         async function initPromo() {
             try {
@@ -263,20 +294,23 @@
 
         async function handleBooking(event) {
             event.preventDefault();
+            const email = document.getElementById('email').value;
+            
+            // 強化信箱驗證檢查
+            if (!validateEmail(email)) {
+                alert('信箱格式錯誤，請檢查！ / Invalid Email Format!');
+                document.getElementById('email').focus();
+                return;
+            }
+
             const btn = document.getElementById('btn-submit');
             const name = document.getElementById('name').value;
             const phone = document.getElementById('phone').value;
-            const email = document.getElementById('email').value;
             const guests = document.getElementById('guests').value;
             const service = document.getElementById('service').value;
             const date = document.getElementById('date').value;
             const time = document.getElementById('time').value;
             const note = document.getElementById('note').value || "無 / None";
-
-            if(!email.includes('@')) {
-                alert('Invalid Email Format');
-                return;
-            }
 
             btn.disabled = true;
             btn.innerText = "Processing...";
@@ -294,7 +328,7 @@
                 
                 if (error) throw error;
 
-                // 2. 發送 EmailJS 通知 (正確嵌入點)
+                // 2. 發送 EmailJS 通知
                 const templateParams = {
                     to_email: email,      // 客人的信箱
                     user_name: name,
