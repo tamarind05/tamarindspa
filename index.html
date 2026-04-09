@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tamarind Spa - 專業理療與舒壓天堂</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <!-- 引入 EmailJS SDK -->
     <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -17,6 +16,8 @@
             --dark-bg: #2c3e50;
             --light-text: #f8f9fa;
             --error-color: #e74c3c;
+            --tmOrange: #ff5722;
+            --tmDeepGreen: #2c3e50;
         }
         header { background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%); color: var(--light-text); padding: 1rem 0; position: sticky; top: 0; z-index: 1000; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
         nav { max-width: 1200px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; padding: 0 2rem; flex-wrap: wrap; }
@@ -65,6 +66,14 @@
         .social-links { display: flex; justify-content: center; gap: 1.5rem; margin-top: 2.5rem; padding-bottom: 1rem; }
         .social-button { display: inline-flex; align-items: center; justify-content: center; width: 48px; height: 48px; border-radius: 50%; background: var(--secondary-color); color: white; text-decoration: none; font-size: 1rem; font-weight: bold; transition: 0.3s; cursor: pointer; }
         footer { background: transparent; color: #999; text-align: center; padding: 1rem 0; font-size: 0.75rem; border-top: 1px solid #eee; max-width: 1000px; margin: 0 auto; }
+        
+        /* Affiliate Section Styles */
+        #affiliate-tools { background: white; padding: 4rem 0; }
+        .affiliate-container { max-width: 1000px; margin: 0 auto; background: #f8fafc; border-radius: 2rem; padding: 2.5rem; border: 2px dashed #e2e8f0; }
+        .bg-tmOrange { background-color: var(--tmOrange); }
+        .text-tmDeepGreen { color: var(--tmDeepGreen); }
+        .affiliate-btn { display: block; background: white; padding: 2rem; border-radius: 1.5rem; text-decoration: none; border: 1px solid #e2e8f0; transition: 0.3s; box-shadow: 0 4px 6px rgba(0,0,0,0.05); margin-top: 1.5rem; }
+        .affiliate-btn:hover { border-color: var(--tmOrange); box-shadow: 0 10px 15px rgba(0,0,0,0.1); transform: translateY(-2px); }
     </style>
 </head>
 <body>
@@ -156,6 +165,25 @@
                 <div class="form-group"><label id="lbl-note">備註 / 特殊需求</label><textarea id="note" rows="3" placeholder=""></textarea></div>
                 <button type="submit" class="form-submit" id="btn-submit">確認預約</button>
             </form>
+        </div>
+    </section>
+
+    <section id="affiliate-tools">
+        <div class="container">
+            <div class="affiliate-container">
+                <div style="text-align: left;">
+                    <div class="bg-tmOrange" style="display: inline-block; color: white; font-size: 10px; px: 8px; py: 2px; padding: 2px 8px; border-radius: 4px; font-weight: 900; text-transform: uppercase; margin-bottom: 1rem;">Digital Concierge</div>
+                    <h3 class="text-tmDeepGreen" style="font-size: 1.8rem; font-weight: 900; margin-bottom: 1rem;">自助預訂參考</h3>
+                    <p style="color: #64748b; font-size: 0.9rem; line-height: 1.6;">想嘗試點不一樣的嗎？除了現場菜單，您也可以透過官方合作夥伴 Klook 預訂「Klook 獨家限定套餐」。這些特別設計的療程組合，結合了 Tamarind SPA 最受歡迎的明星項目，讓您能以更直覺、便利的方式，享受我們為 Klook 會員量身打造的極致體驗。Looking for something unique? Explore our exclusive Klook-only packages. These specially curated bundles combine Tamarind SPA's signature treatments for a more seamless and rewarding booking experience.<br><br>透過此處連結進入，將享有與官方同步的即時優惠。</p>
+                    
+                    <a href="https://s.klook.com/c/mXkGq9rMwQ" target="_blank" class="affiliate-btn">
+                        <div style="display: flex; align-items: center; gap: 1rem;">
+                            <span style="font-size: 1.5rem;">🌿</span>
+                            <div class="text-tmDeepGreen" style="font-weight: 900; font-size: 1.1rem;">Klook線上特製SPA 預約</div>
+                        </div>
+                    </a>
+                </div>
+            </div>
         </div>
     </section>
 
